@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5ef">
+  <title>小步成长 · 家庭成长系统</title>
+  <style>
+    :root {
+      --paper: #f7f5ef;
+      --surface: #fffdf8;
+      --ink: #20302d;
+      --muted: #71807a;
+      --line: #e6e3d9;
+      --teal: #2e7d73;
+      --teal-soft: #dff0eb;
+      --coral: #de735c;
+      --coral-soft: #fbe5dd;
+      --yellow: #e4b84f;
+      --yellow-soft: #fff1c9;
+      --blue: #52739d;
+      --blue-soft: #e5edf7;
+      --shadow: 0 12px 32px rgba(37, 52, 48, .07);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.5;
+    }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app-shell { min-height: 100vh; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 22px 28px 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: 13px;
+      color: white;
+      background: var(--teal);
+      font-size: 20px;
+      box-shadow: 0 6px 14px rgba(46, 125, 115, .22);
+    }
+    .brand h1 { margin: 0; font-size: 18px; letter-spacing: .02em; }
+    .brand p { margin: 1px 0 0; color: var(--muted); font-size: 12px; }
+    .date-chip {
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 253, 248, .72);
+      font-size: 13px;
+    }
+
+    .main { max-width: 1280px; margin: 0 auto; padding: 0 28px 44px; }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      align-items: stretch;
+      gap: 18px;
+      margin: 18px 0 24px;
+    }
+    .hero-copy {
+      position: relative;
+      overflow: hidden;
+      min-height: 224px;
+      padding: 30px 32px;
+      border: 1px solid #d9e9e3;
+      border-radius: var(--radius);
+      background: var(--teal-soft);
+    }
+    .hero-copy::after {
+      position: absolute;
+      right: 30px;
+      bottom: -30px;
+      width: 170px;
+      height: 170px;
+      border: 22px solid rgba(255, 255, 255, .52);
+      border-radius: 50%;
+      content: "";
+    }
+    .eyebrow { margin: 0 0 8px; color: var(--teal); font-size: 12px; font-weight: 700; letter-spacing: .12em; }
+    .hero h2 { max-width: 520px; margin: 0; font-size: clamp(25px, 4vw, 38px); line-height: 1.18; letter-spacing: -.03em; }
+    .hero-copy > p:not(.eyebrow) { max-width: 520px; margin: 14px 0 0; color: #48645e; font-size: 15px; }
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 25px 26px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .hero-stat .label { color: var(--muted); font-size: 13px; }
+    .progress-number { display: flex; align-items: baseline; gap: 8px; margin: 10px 0 15px; }
+    .progress-number strong { font-size: 42px; line-height: 1; }
+    .progress-number span { color: var(--muted); font-size: 14px; }
+    .progress-track { height: 9px; overflow: hidden; border-radius: 99px; background: #edf0ea; }
+    .progress-bar { width: 48%; height: 100%; border-radius: inherit; background: var(--coral); transition: width .3s ease; }
+    .hero-stat small { margin-top: 12px; color: var(--muted); }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--line); }
+    .tab {
+      padding: 10px 14px 12px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+    .view { display: none; }
+    .view.active { display: block; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin: 0 0 14px; }
+    .section-heading h3 { margin: 0; font-size: 20px; letter-spacing: -.02em; }
+    .section-heading p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+    .section-heading .date-label { color: var(--coral); font-size: 13px; font-weight: 700; }
+
+    .today-grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(300px, .92fr); gap: 18px; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 22px 14px; }
+    .panel-head h4 { margin: 0; font-size: 16px; }
+    .panel-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .task-list { padding: 0 22px 18px; }
+    .task {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 0;
+      border-top: 1px solid #f0eee8;
+    }
+    .task:first-child { border-top: 0; }
+    .task input { position: absolute; opacity: 0; pointer-events: none; }
+    .check {
+      flex: 0 0 auto;
+      display: grid;
+      width: 23px;
+      height: 23px;
+      place-items: center;
+      margin-top: 1px;
+      border: 1.5px solid #b9c5be;
+      border-radius: 7px;
+      color: white;
+      font-size: 14px;
+      transition: .18s ease;
+    }
+    .task input:checked + .check { border-color: var(--teal); background: var(--teal); }
+    .task input:checked + .check::after { content: "✓"; }
+    .task label { flex: 1; cursor: pointer; }
+    .task-title { display: block; font-size: 14px; font-weight: 700; }
+    .task-note { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+    .task input:checked ~ label .task-title { color: var(--muted); text-decoration: line-through; }
+    .tag { display: inline-block; padding: 4px 7px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .tag.body { color: #9c5d22; background: var(--yellow-soft); }
+    .tag.language { color: #376589; background: var(--blue-soft); }
+    .tag.emotion { color: #a14f42; background: var(--coral-soft); }
+    .tag.life { color: #2f7168; background: var(--teal-soft); }
+
+    .mood-panel { padding-bottom: 18px; }
+    .mood-list { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 2px 22px 18px; }
+    .mood {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+      padding: 9px 4px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--muted);
+      background: #faf9f4;
+      font-size: 11px;
+    }
+    .mood span { font-size: 24px; line-height: 1; }
+    .mood.selected { border-color: var(--coral); color: var(--ink); background: var(--coral-soft); }
+    .note-box { padding: 0 22px; }
+    .note-box label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 12px; font-weight: 700; }
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 92px;
+      resize: vertical;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      outline: none;
+      color: var(--ink);
+      background: #fffefa;
+      font-size: 13px;
+    }
+    textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(46, 125, 115, .11); }
+    .save-state { display: block; margin-top: 8px; color: var(--muted); font-size: 11px; }
+
+    .weekly-layout { display: grid; grid-template-columns: minmax(0, 1.32fr) minmax(260px, .68fr); gap: 18px; }
+    .week-table-wrap { overflow: auto; padding: 0 18px 18px; }
+    .week-table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 13px; }
+    .week-table th, .week-table td { padding: 13px 10px; border-top: 1px solid #f0eee8; text-align: center; }
+    .week-table th:first-child, .week-table td:first-child { width: 38%; text-align: left; }
+    .week-table th { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .day-dot { display: inline-grid; width: 26px; height: 26px; place-items: center; border-radius: 50%; color: var(--muted); background: #f2f3ed; font-size: 12px; }
+    .day-dot.done { color: white; background: var(--teal); }
+    .week-summary { padding: 0 22px 20px; }
+    .summary-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; border-top: 1px solid #f0eee8; font-size: 13px; }
+    .summary-item:first-child { border-top: 0; }
+    .summary-item strong { color: var(--teal); font-size: 18px; }
+    .summary-item span { color: var(--muted); }
+
+    .domains { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .domain { min-height: 174px; padding: 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+    .domain-icon { display: grid; width: 36px; height: 36px; place-items: center; margin-bottom: 16px; border-radius: 10px; font-size: 19px; }
+    .domain:nth-child(1) .domain-icon { background: var(--yellow-soft); }
+    .domain:nth-child(2) .domain-icon { background: var(--blue-soft); }
+    .domain:nth-child(3) .domain-icon { background: var(--coral-soft); }
+    .domain:nth-child(4) .domain-icon { background: var(--teal-soft); }
+    .domain:nth-child(5) .domain-icon { background: #eee9fa; }
+    .domain:nth-child(6) .domain-icon { background: #f7e7d6; }
+    .domain h4 { margin: 0 0 5px; font-size: 15px; }
+    .domain p { margin: 0; color: var(--muted); font-size: 12px; }
+    .domain-meter { height: 5px; margin-top: 17px; overflow: hidden; border-radius: 99px; background: #eff0eb; }
+    .domain-meter span { display: block; height: 100%; border-radius: inherit; background: var(--teal); }
+
+    .review-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .review-card { padding: 22px; }
+    .review-card h4 { margin: 0 0 5px; font-size: 16px; }
+    .review-card p { margin: 0 0 16px; color: var(--muted); font-size: 12px; }
+    .review-card textarea { min-height: 150px; }
+    .reset-btn { border: 0; color: var(--muted); background: transparent; font-size: 12px; text-decoration: underline; }
+
+    .guide-principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+    .principle { padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+    .principle strong { display: block; margin-bottom: 4px; color: var(--teal); font-size: 14px; }
+    .principle span { color: var(--muted); font-size: 12px; }
+    .guide-layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr); gap: 18px; }
+    .guide-section { padding: 22px; }
+    .guide-section h4 { margin: 0 0 5px; font-size: 16px; }
+    .guide-section > p { margin: 0 0 16px; color: var(--muted); font-size: 12px; }
+    .script-list { display: grid; gap: 10px; }
+    .script-item { padding: 13px 14px; border-left: 3px solid var(--coral); border-radius: 0 10px 10px 0; background: #fff8f4; }
+    .script-item strong { display: block; margin-bottom: 4px; font-size: 13px; }
+    .script-item p { margin: 0; color: #596560; font-size: 12px; }
+    .script-item em { color: var(--coral); font-style: normal; font-weight: 700; }
+    .step-list { display: grid; gap: 10px; counter-reset: guide-step; }
+    .step-item { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
+    .step-item::before { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 50%; color: var(--teal); background: var(--teal-soft); content: counter(guide-step); counter-increment: guide-step; font-size: 12px; font-weight: 700; }
+    .step-item strong { display: block; margin-bottom: 2px; font-size: 13px; }
+    .step-item span { color: var(--muted); font-size: 12px; }
+    .guide-checks { margin-top: 18px; padding-top: 15px; border-top: 1px solid #f0eee8; }
+    .guide-check { display: flex; align-items: center; gap: 8px; margin: 10px 0; color: #53615c; font-size: 13px; }
+    .guide-check input { accent-color: var(--teal); }
+    .parent-note { margin-top: 18px; }
+    .parent-note textarea { min-height: 104px; }
+    .advice-wrap { margin-top: 18px; }
+    .advice-wrap > .panel-head { padding-bottom: 16px; }
+    .advice-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 22px 22px; }
+    .advice-card { min-height: 142px; padding: 14px; border: 1px solid #eeeae0; border-radius: 11px; background: #fffefa; }
+    .advice-card h5 { margin: 0 0 7px; font-size: 13px; }
+    .advice-card p { margin: 0; color: var(--muted); font-size: 12px; }
+    .advice-card strong { display: block; margin-top: 9px; color: var(--coral); font-size: 11px; }
+
+    @media (max-width: 860px) {
+      .hero, .today-grid, .weekly-layout { grid-template-columns: 1fr; }
+      .domains { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .topbar, .main { padding-left: 16px; padding-right: 16px; }
+      .topbar { align-items: flex-start; }
+      .date-chip { display: none; }
+      .hero-copy { padding: 25px 22px; }
+      .hero-stat { min-height: 162px; }
+      .tabs { overflow-x: auto; }
+      .tab { white-space: nowrap; }
+      .domains, .review-layout { grid-template-columns: 1fr; }
+      .guide-principles { grid-template-columns: 1fr; }
+      .guide-layout { grid-template-columns: 1fr; }
+      .advice-grid { grid-template-columns: repeat(2, 1fr); }
+      .section-heading { align-items: flex-start; flex-direction: column; gap: 5px; }
+      .mood-list { gap: 5px; padding-left: 14px; padding-right: 14px; }
+      .panel-head, .task-list, .note-box { padding-left: 16px; padding-right: 16px; }
+      .advice-grid { grid-template-columns: 1fr; padding-left: 16px; padding-right: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">✦</div>
+        <div>
+          <h1>小步成长</h1>
+          <p>四岁家庭成长系统</p>
+        </div>
+      </div>
+      <div class="date-chip" id="todayDate"></div>
+    </header>
+
+    <main class="main">
+      <section class="hero" aria-label="今日概览">
+        <div class="hero-copy">
+          <p class="eyebrow">TODAY · 小小一步</p>
+          <h2>今天，陪她把一件小事做好。</h2>
+          <p>成长不是赶路。看见她的兴趣，给她一点时间，也给她一次自己尝试的机会。</p>
+        </div>
+        <div class="hero-stat">
+          <div>
+            <span class="label">今日陪伴进度</span>
+            <div class="progress-number"><strong id="progressText">48%</strong><span id="progressDetail">3 / 6 项完成</span></div>
+            <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+          </div>
+          <small id="encouragement">完成一小步，也值得被看见。</small>
+        </div>
+      </section>
+
+      <nav class="tabs" aria-label="成长系统导航">
+        <button class="tab active" data-view="today">今天</button>
+        <button class="tab" data-view="week">本周看板</button>
+        <button class="tab" data-view="domains">成长领域</button>
+        <button class="tab" data-view="review">月度复盘</button>
+        <button class="tab" data-view="parent">家长指南</button>
+      </nav>
+
+      <section class="view active" id="today" aria-labelledby="today-title">
+        <div class="section-heading">
+          <div><h3 id="today-title">今天的陪伴清单</h3><p>选三到五件适合今天的事，就已经很好。</p></div>
+          <span class="date-label">不追求全部完成</span>
+        </div>
+        <div class="today-grid">
+          <article class="panel">
+            <div class="panel-head"><div><h4>小步任务</h4><p>完成后会自动保存在本机</p></div><button class="reset-btn" id="resetTasks">清空今日</button></div>
+            <div class="task-list" id="taskList">
+              <div class="task"><input type="checkbox" id="task-1" data-task><span class="check"></span><label for="task-1"><span class="task-title">户外跑跳或散步 30 分钟</span><span class="task-note"><span class="tag body">身体</span> 让身体先开心起来</span></label></div>
+              <div class="task"><input type="checkbox" id="task-2" data-task><span class="check"></span><label for="task-2"><span class="task-title">一起读一本绘本</span><span class="task-note"><span class="tag language">语言</span> 让她讲讲最喜欢的画面</span></label></div>
+              <div class="task"><input type="checkbox" id="task-3" data-task><span class="check"></span><label for="task-3"><span class="task-title">自己完成一件生活小事</span><span class="task-note"><span class="tag life">自理</span> 穿衣、摆餐具或收拾玩具</span></label></div>
+              <div class="task"><input type="checkbox" id="task-4" data-task><span class="check"></span><label for="task-4"><span class="task-title">说出今天的一种心情</span><span class="task-note"><span class="tag emotion">情绪</span> 不评价，只认真听她说</span></label></div>
+              <div class="task"><input type="checkbox" id="task-5" data-task><span class="check"></span><label for="task-5"><span class="task-title">做一次自由创作</span><span class="task-note"><span class="tag body">探索</span> 画画、积木、橡皮泥都可以</span></label></div>
+              <div class="task"><input type="checkbox" id="task-6" data-task><span class="check"></span><label for="task-6"><span class="task-title">睡前说一件开心的事</span><span class="task-note"><span class="tag language">连接</span> 用拥抱结束今天</span></label></div>
+            </div>
+          </article>
+
+          <article class="panel mood-panel">
+            <div class="panel-head"><div><h4>今天的心情</h4><p>先记录，不急着解释</p></div></div>
+            <div class="mood-list" id="moodList">
+              <button class="mood" data-mood="sunny"><span>☀</span>活力</button>
+              <button class="mood" data-mood="happy"><span>☺</span>开心</button>
+              <button class="mood" data-mood="calm"><span>☁</span>平静</button>
+              <button class="mood" data-mood="tired"><span>◌</span>疲惫</button>
+              <button class="mood" data-mood="upset"><span>⌁</span>烦躁</button>
+            </div>
+            <div class="note-box">
+              <label for="dailyNote">今天想记下什么？</label>
+              <textarea id="dailyNote" placeholder="比如：她今天主动把积木分给了妹妹……"></textarea>
+              <span class="save-state" id="noteState">自动保存到本机</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="week" aria-labelledby="week-title">
+        <div class="section-heading"><div><h3 id="week-title">本周看板</h3><p>记录趋势，比追求满分更有用。</p></div><span class="date-label" id="weekDate"></span></div>
+        <div class="weekly-layout">
+          <article class="panel">
+            <div class="panel-head"><div><h4>成长节奏</h4><p>每个圆点代表一次完成或尝试</p></div></div>
+            <div class="week-table-wrap">
+              <table class="week-table"><thead><tr><th>本周小目标</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th><th>日</th></tr></thead>
+                <tbody>
+                  <tr><td>户外活动</td><td><span class="day-dot done">✓</span></td><td><span class="day-dot done">✓</span></td><td><span class="day-dot">·</span></td><td><span class="day-dot done">✓</span></td><td><span class="day-dot">·</span></td><td><span class="day-dot">·</span></td><td><span class="day-dot">·</span></td></tr>
+                  <tr><td>亲子阅读</td><td><span class="day-dot done">✓</span></td><td><span class="day-dot">·</span></td><td><span class="day-dot done">✓</span></td><td><span class="day-dot done">✓</span></td><td><span class="day-dot">·</span></td><td><span class="day-dot">·</span></td><td><span class="day-dot">·</span></td></tr>
+                  <tr><td>参与家务</td><td><span class="day-dot">·</span></td><td><span class="day-dot done">✓</span></td><td><span class="day-dot">·</span></td><td><span class="day-dot done">✓</span></td><td><span class="day-dot">·</span></td><td><span class="day-dot">·</span></td><td><span class="day-dot">·</span></td></tr>
+                  <tr><td>表达情绪</td><td><span class="day-dot">·</span></td><td><span class="day-dot done">✓</span></td><td><span class="day-dot done">✓</span></td><td><span class="day-dot">·</span></td><td><span class="day-dot">·</span></td><td><span class="day-dot">·</span></td><td><span class="day-dot">·</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><h4>本周小结</h4><p>把注意力放在变化上</p></div></div>
+            <div class="week-summary">
+              <div class="summary-item"><span>已完成的小目标</span><strong>10</strong></div>
+              <div class="summary-item"><span>最常出现的心情</span><strong>开心</strong></div>
+              <div class="summary-item"><span>值得继续的习惯</span><strong>阅读</strong></div>
+              <div class="summary-item"><span>下周少做一点</span><strong>催促</strong></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="domains" aria-labelledby="domains-title">
+        <div class="section-heading"><div><h3 id="domains-title">六个成长领域</h3><p>不比较，不抢跑，保持均衡和兴趣。</p></div></div>
+        <div class="domains">
+          <article class="domain"><div class="domain-icon">◒</div><h4>身体健康</h4><p>睡眠、饮食、运动与身体协调。</p><div class="domain-meter"><span style="width:72%"></span></div></article>
+          <article class="domain"><div class="domain-icon">Aa</div><h4>语言阅读</h4><p>听懂、表达、复述和提出问题。</p><div class="domain-meter"><span style="width:61%"></span></div></article>
+          <article class="domain"><div class="domain-icon">◎</div><h4>情绪社交</h4><p>识别情绪，等待、轮流与协商。</p><div class="domain-meter"><span style="width:54%"></span></div></article>
+          <article class="domain"><div class="domain-icon">＋</div><h4>生活自理</h4><p>把力所能及的事交还给她。</p><div class="domain-meter"><span style="width:68%"></span></div></article>
+          <article class="domain"><div class="domain-icon">⌘</div><h4>认知探索</h4><p>在游戏中认识数量、规律和因果。</p><div class="domain-meter"><span style="width:49%"></span></div></article>
+          <article class="domain"><div class="domain-icon">✎</div><h4>兴趣创造</h4><p>画画、音乐、手工、自然和想象。</p><div class="domain-meter"><span style="width:76%"></span></div></article>
+        </div>
+      </section>
+
+      <section class="view" id="review" aria-labelledby="review-title">
+        <div class="section-heading"><div><h3 id="review-title">月度复盘</h3><p>每月一次，和孩子一起回头看。</p></div><span class="date-label">2024年6月</span></div>
+        <div class="review-layout">
+          <article class="panel review-card"><h4>本月看见的进步</h4><p>记录具体行为，不写抽象评价。</p><textarea data-review="progress" placeholder="她开始主动……"></textarea></article>
+          <article class="panel review-card"><h4>本月遇到的困难</h4><p>困难是调整方法的线索。</p><textarea data-review="challenge" placeholder="在……场景下，她容易……"></textarea></article>
+          <article class="panel review-card"><h4>她最近喜欢什么</h4><p>兴趣通常是最好的入口。</p><textarea data-review="interest" placeholder="她最近反复玩、看或问的是……"></textarea></article>
+          <article class="panel review-card"><h4>下月只保留三件事</h4><p>少一点，反而更容易坚持。</p><textarea data-review="next" placeholder="1. ……&#10;2. ……&#10;3. ……"></textarea></article>
+        </div>
+      </section>
+
+      <section class="view" id="parent" aria-labelledby="parent-title">
+        <div class="section-heading"><div><h3 id="parent-title">家长指南</h3><p>少一点催促，多一点示范；少一点评判，多一点连接。</p></div><span class="date-label">陪伴先于训练</span></div>
+        <div class="guide-principles">
+          <div class="principle"><strong>先连接，再引导</strong><span>先让她感到被理解，再讨论下一步怎么做。</span></div>
+          <div class="principle"><strong>先示范，再放手</strong><span>把任务拆小，给她一次自己尝试的机会。</span></div>
+          <div class="principle"><strong>描述行为，不贴标签</strong><span>说“你把积木收好了”，少说“你真乖”。</span></div>
+        </div>
+        <div class="guide-layout">
+          <article class="panel guide-section">
+            <h4>日常可以这样说</h4>
+            <p>把“要求”换成孩子听得懂、做得到的下一步。</p>
+            <div class="script-list">
+              <div class="script-item"><strong>她不愿意收拾</strong><p><em>先说：</em>“你还想继续玩，我知道。现在我们先收三块，剩下的你想自己收还是我陪你收？”</p></div>
+              <div class="script-item"><strong>她因为输了而哭</strong><p><em>先说：</em>“输了很难受。你可以哭，我陪你。等你准备好了，我们再想下一局怎么玩。”</p></div>
+              <div class="script-item"><strong>她做错了事情</strong><p><em>先说：</em>“这里和我们计划的不一样。我们一起看看，是重来、修好，还是换一种方法？”</p></div>
+              <div class="script-item"><strong>她一直说“我不会”</strong><p><em>先说：</em>“现在还不会很正常。我们先做第一步，我做一次，你再试一次。”</p></div>
+              <div class="script-item"><strong>她早上磨蹭、不想出门</strong><p><em>先说：</em>“你还没准备好，我知道。我们先做穿衣这一件，穿好后你来选今天带哪一个小物件。”</p></div>
+              <div class="script-item"><strong>她不愿意离开游乐场</strong><p><em>先说：</em>“你还想玩，停下来很难受。我们再玩最后一次，然后你负责按电梯，我负责拿东西。”</p></div>
+              <div class="script-item"><strong>她抢玩具或动手推人</strong><p><em>先说：</em>“我不会让你推人。你想要这个玩具，可以说‘轮到我时请告诉我’，我们一起等一等。”</p></div>
+              <div class="script-item"><strong>她害怕新活动、不肯尝试</strong><p><em>先说：</em>“你有点担心，可以先站在旁边看。等你准备好，我们只试最小的一步。”</p></div>
+              <div class="script-item"><strong>她被小朋友拒绝后难过</strong><p><em>先说：</em>“被拒绝真的会难过。你可以先来抱抱我，也可以过一会儿再问一次，或者去找另一个愿意一起玩的朋友。”</p></div>
+              <div class="script-item"><strong>她想一个人安静一会儿</strong><p><em>先说：</em>“你现在想自己待一会儿，我会在附近。等你准备好，可以告诉我需要什么。”</p></div>
+            </div>
+          </article>
+          <article class="panel guide-section">
+            <h4>冲突时的三步法</h4>
+            <p>情绪很大的时候，先稳定，再教育。</p>
+            <div class="step-list">
+              <div class="step-item"><div><strong>看见情绪</strong><span>“你很生气，因为游戏结束了。”</span></div></div>
+              <div class="step-item"><div><strong>说清边界</strong><span>“可以生气，但不能打人或摔东西。”</span></div></div>
+              <div class="step-item"><div><strong>给两个选择</strong><span>“你想先抱一会儿，还是去安静角喝水？”</span></div></div>
+            </div>
+            <div class="guide-checks">
+              <strong>本周家长提醒</strong>
+              <label class="guide-check"><input type="checkbox" data-parent-check="listen"> 我今天有认真听完她的话</label>
+              <label class="guide-check"><input type="checkbox" data-parent-check="pause"> 我在发火前先停了十秒</label>
+              <label class="guide-check"><input type="checkbox" data-parent-check="choice"> 我给过她一次真实的选择</label>
+            </div>
+          </article>
+        </div>
+        <article class="panel advice-wrap">
+          <div class="panel-head"><div><h4>更多家长建议</h4><p>先调整环境，再要求孩子改变。</p></div></div>
+          <div class="advice-grid">
+            <div class="advice-card"><h5>睡眠：固定流程</h5><p>睡前尽量保持相同顺序：洗漱、读书、拥抱、关灯。流程稳定，孩子更容易放松。</p><strong>少用“快点睡”，多用“现在进入睡前流程”。</strong></div>
+            <div class="advice-card"><h5>吃饭：不追着喂</h5><p>提供合适的食物和时间，让她决定吃多少。把注意力放在尝试，而不是吃光。</p><strong>少谈输赢，多说“你可以听听身体的感觉”。</strong></div>
+            <div class="advice-card"><h5>屏幕：提前约定</h5><p>在开始前说清楚看什么、看多久、结束后做什么。结束时保持规则一致。</p><strong>用计时器和收尾仪式，减少临时争执。</strong></div>
+            <div class="advice-card"><h5>夸奖：具体一点</h5><p>表扬她做了什么、用了什么方法，而不是只说“真棒”。这会帮助她认识自己的能力。</p><strong>“你刚才等了三分钟，真的很有耐心。”</strong></div>
+            <div class="advice-card"><h5>规则：少而稳定</h5><p>家庭规则控制在三到五条，例如不打人、物品归位、需要帮助时说出来。</p><strong>规则一旦说出，大人也要尽量做到。</strong></div>
+            <div class="advice-card"><h5>游戏：让她做主</h5><p>每天留出一小段“她带着你玩”的时间，不急着教，不频繁纠正。</p><strong>跟随她的想象，比安排一套玩法更有价值。</strong></div>
+            <div class="advice-card"><h5>安全：练习拒绝</h5><p>教她说“不舒服”“请停下”“我要找妈妈”，同时告诉她遇到任何情况都可以求助。</p><strong>尊重身体边界，也尊重她拒绝拥抱的权利。</strong></div>
+            <div class="advice-card"><h5>家人：统一口径</h5><p>提前和家人商量几条核心规则，避免一个人要求、另一个人马上推翻。</p><strong>可以不同做法，但底线和回应方式尽量一致。</strong></div>
+            <div class="advice-card"><h5>提问：少一点盘问</h5><p>把“今天学了什么”换成“今天哪个时刻最好玩”，更容易打开她的话匣子。</p><strong>先分享自己的事，再邀请她分享。</strong></div>
+            <div class="advice-card"><h5>独立：给足等待</h5><p>她自己穿衣、倒水时会慢一些。只要安全，就尽量留出时间，不要马上接手。</p><strong>“需要帮忙时叫我”比“我来帮你”更能建立能力感。</strong></div>
+            <div class="advice-card"><h5>公共场合：提前预演</h5><p>去餐厅、医院或商场前，先说清目的、规则和离开的信号，降低临时失控。</p><strong>把“不要闹”换成一条具体可做的规则。</strong></div>
+            <div class="advice-card"><h5>争抢：不急着判输赢</h5><p>先确保安全，再帮助孩子说出“我还没玩好”“轮到我时请告诉我”。</p><strong>解决问题比找出谁先开始更重要。</strong></div>
+            <div class="advice-card"><h5>失败：允许重来</h5><p>拼图、搭积木或画画失败时，先问她想休息、修改，还是换一种方法。</p><strong>让她知道，失败不是被评价的时刻。</strong></div>
+            <div class="advice-card"><h5>隐私：认识身体边界</h5><p>用正确、自然的词称呼身体部位，告诉她身体属于自己，秘密让她不舒服时要告诉可信任的大人。</p><strong>不强迫亲吻和拥抱，也不拿身体开玩笑。</strong></div>
+            <div class="advice-card"><h5>家长：先照顾自己</h5><p>当你已经很累时，可以诚实说“我需要安静五分钟”，先让自己恢复，再继续陪伴。</p><strong>稳定的家长，比完美的家长更重要。</strong></div>
+          </div>
+        </article>
+        <article class="panel guide-section parent-note">
+          <h4>给家长的一句话</h4>
+          <p>今天哪一个瞬间，让你看见了她正在长大？</p>
+          <textarea data-parent-note placeholder="比如：她今天自己穿好了鞋，虽然左右脚穿反了，但她很认真……"></textarea>
+          <span class="save-state">自动保存到本机</span>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const storeKey = 'little-steps-growth-v1';
+    const state = JSON.parse(localStorage.getItem(storeKey) || '{}');
+    const today = new Date();
+    const pad = value => String(value).padStart(2, '0');
+    const dateText = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日 · ${['日','一','二','三','四','五','六'][today.getDay()]}`;
+    document.getElementById('todayDate').textContent = dateText;
+    const monday = new Date(today);
+    const dayOffset = today.getDay() === 0 ? -6 : 1 - today.getDay();
+    monday.setDate(today.getDate() + dayOffset);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    const formatShort = date => `${date.getMonth() + 1}月${date.getDate()}日`;
+    document.getElementById('weekDate').textContent = `本周 · ${formatShort(monday)}—${formatShort(sunday)}`;
+
+    const save = () => localStorage.setItem(storeKey, JSON.stringify(state));
+    const taskInputs = [...document.querySelectorAll('[data-task]')];
+    taskInputs.forEach(input => {
+      input.checked = Boolean(state.tasks && state.tasks[input.id]);
+      input.addEventListener('change', () => {
+        state.tasks = state.tasks || {};
+        state.tasks[input.id] = input.checked;
+        save();
+        updateProgress();
+      });
+    });
+
+    function updateProgress() {
+      const completed = taskInputs.filter(item => item.checked).length;
+      const percent = Math.round(completed / taskInputs.length * 100);
+      document.getElementById('progressText').textContent = `${percent}%`;
+      document.getElementById('progressDetail').textContent = `${completed} / ${taskInputs.length} 项完成`;
+      document.getElementById('progressBar').style.width = `${percent}%`;
+      document.getElementById('encouragement').textContent = percent === 100 ? '今天的陪伴清单完成了，辛苦啦。' : percent >= 50 ? '已经走过一半，剩下的慢慢来。' : '完成一小步，也值得被看见。';
+    }
+    updateProgress();
+
+    document.getElementById('resetTasks').addEventListener('click', () => {
+      taskInputs.forEach(input => { input.checked = false; });
+      state.tasks = {};
+      save();
+      updateProgress();
+    });
+
+    const moodButtons = [...document.querySelectorAll('[data-mood]')];
+    moodButtons.forEach(button => {
+      if (state.mood === button.dataset.mood) button.classList.add('selected');
+      button.addEventListener('click', () => {
+        moodButtons.forEach(item => item.classList.remove('selected'));
+        button.classList.add('selected');
+        state.mood = button.dataset.mood;
+        save();
+      });
+    });
+
+    const dailyNote = document.getElementById('dailyNote');
+    dailyNote.value = state.dailyNote || '';
+    dailyNote.addEventListener('input', () => {
+      state.dailyNote = dailyNote.value;
+      save();
+      document.getElementById('noteState').textContent = '已自动保存';
+    });
+
+    document.querySelectorAll('[data-review]').forEach(field => {
+      field.value = (state.review && state.review[field.dataset.review]) || '';
+      field.addEventListener('input', () => {
+        state.review = state.review || {};
+        state.review[field.dataset.review] = field.value;
+        save();
+      });
+    });
+
+    document.querySelectorAll('[data-parent-check]').forEach(check => {
+      check.checked = Boolean(state.parentChecks && state.parentChecks[check.dataset.parentCheck]);
+      check.addEventListener('change', () => {
+        state.parentChecks = state.parentChecks || {};
+        state.parentChecks[check.dataset.parentCheck] = check.checked;
+        save();
+      });
+    });
+
+    const parentNote = document.querySelector('[data-parent-note]');
+    parentNote.value = state.parentNote || '';
+    parentNote.addEventListener('input', () => {
+      state.parentNote = parentNote.value;
+      save();
+    });
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(item => item.classList.remove('active'));
+        document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.view).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
